@@ -21,8 +21,7 @@ def convert_audio_to_text(audio_file):
         timestamps.append((i / 1000, (i + len(sound[i:i+10000])) / 1000))  # Convert milliseconds to seconds
 
     transcribed_text = ""
-    total_chunks = len(audio_chunks)
-    for i, chunk in enumerate(audio_chunks):
+    for chunk in audio_chunks:
         with sr.AudioFile(chunk.export(format="wav")) as source:
             audio_data = recognizer.record(source)
         try:
@@ -31,9 +30,6 @@ def convert_audio_to_text(audio_file):
             print("Google Speech Recognition could not understand the audio")
         except sr.RequestError as e:
             print("Could not request results from Google Speech Recognition service; {0}".format(e))
-        
-        progress = int((i + 1) / total_chunks * 100)
-        update_progress(progress)  # Update progress bar
 
     return transcribed_text, timestamps
 
@@ -53,21 +49,10 @@ def convert_time_format(seconds):
     seconds %= 60
     return f"{hours:02d}:{minutes:02d}:{seconds:02d},000"
 
-def update_progress(progress):
-    progress_var.set(progress)
-    progress_label.config(text=f"Conversion Progress: {progress}%")
-
 root = tk.Tk()
 root.title("Audio to SRT Converter")
 
 browse_button = tk.Button(root, text="Browse", command=browse_file)
 browse_button.pack()
-
-progress_var = tk.IntVar()
-progress_bar = ttk.Progressbar(root, orient="horizontal", length=200, mode="determinate", variable=progress_var)
-progress_bar.pack()
-
-progress_label = tk.Label(root, text="Conversion Progress: 0%")
-progress_label.pack()
 
 root.mainloop()
